@@ -1,0 +1,164 @@
+﻿type Card {
+    cardId: String!
+    type: String!
+    name: String!
+    cardType: CardTypeEnum!
+    cost: Int!
+    attack: Int
+    defense: Int
+    description: String!
+    effectType: EffectTypeEnum
+    imageUrl: String
+}
+
+enum CardTypeEnum {
+    FOLLOWER
+    SPELL
+    AMULET
+}
+
+enum EffectTypeEnum {
+    DAMAGE
+    HEAL
+    BUFF
+    DEBUFF
+}
+
+type Player {
+    playerId: String!
+    type: String!
+    username: String!
+    exp: Int!
+    level: Int!
+    ownedCards: [OwnedCard!]!
+    ownedDecks: [String!]!
+}
+
+type OwnedCard {
+    cardId: String!
+    quantity: Int!
+}
+
+type Deck {
+    deckId: String!
+    type: String!
+    playerId: String!
+    cards: [DeckCard!]!
+}
+
+type DeckCard {
+    cardId: String!
+    quantity: Int!
+}
+
+type MatchHistory {
+    matchHistoryId: String!
+    type: String!
+    player1Id: String!
+    player1Cards: [MatchCard!]!
+    player2Id: String!
+    player2Cards: [MatchCard!]!
+    turnCount: Int!
+    firstPlayerId: String!
+    winnerId: String!
+    matchDate: String! # ISO 8601 format
+}
+
+type MatchCard {
+    cardId: String!
+    quantity: Int!
+}
+
+type MatchStatus {
+    matchStatusId: String!
+    type: String!
+    player1Id: String!
+    player1Lp: Int!
+    player1Cost: Int!
+    player1Cards: [MatchCard!]!
+    player1Hand: [String!]!
+    player1Deck: [String!]!
+    player1Discard: [String!]!
+    player2Id: String!
+    player2Lp: Int!
+    player2Cost: Int!
+    player2Cards: [MatchCard!]!
+    player2Hand: [String!]!
+    player2Deck: [String!]!
+    player2Discard: [String!]!
+    turnCount: Int!
+    firstPlayerId: String!
+    winnerId: String!
+    matchDate: String!
+}
+
+type Query {
+    getCard(cardId: String!): Card
+    getPlayer(playerId: String!): Player
+    getDeck(deckId: String!): Deck
+    getMatchHistory(matchHistoryId: String!): MatchHistory
+    getMatchStatus(matchStatusId: String!): MatchStatus
+}
+
+type Mutation {
+    createCard(input: CardInput!): Card
+    updateCard(cardId: String!, input: CardInput!): Card
+    deleteCard(cardId: String!): Card
+    createPlayer(input: PlayerInput!): Player
+    updatePlayer(playerId: String!, input: PlayerInput!): Player
+    deletePlayer(playerId: String!): Player
+    createDeck(input: DeckInput!): Deck
+    updateDeck(deckId: String!, input: DeckInput!): Deck
+    deleteDeck(deckId: String!): Deck
+    createMatchStatus(input: MatchStatusInput!): MatchStatus
+    updateMatchStatus(matchStatusId: String!, input: MatchStatusInput!): MatchStatus
+}
+
+input CardInput {
+    type: String!
+    name: String!
+    cardType: CardTypeEnum!
+    cost: Int!
+    attack: Int
+    defense: Int
+    description: String!
+    effectType: EffectTypeEnum
+    imageUrl: String
+}
+
+input PlayerInput {
+    type: String!
+    username: String!
+    exp: Int!
+    level: Int!
+    ownedCards: [OwnedCard!]!
+    ownedDecks: [String!]!
+}
+
+input DeckInput {
+    type: String!
+    playerId: String!
+    cards: [DeckCard!]!
+}
+
+input MatchStatusInput {
+    type: String!
+    player1Id: String!
+    player1Cards: [MatchCard!]!
+    player1Hand: [String!]!
+    player1Deck: [String!]!
+    player1Discard: [String!]!
+    player2Id: String!
+    player2Cards: [MatchCard!]!
+    player2Hand: [String!]!
+    player2Deck: [String!]!
+    player2Discard: [String!]!
+    turnCount: Int!
+    firstPlayerId: String!
+    winnerId: String!
+    matchDate: String!
+}
+
+type Subscription {
+    onMatchStatusUpdated(matchStatusId: String!): MatchStatus
+}
