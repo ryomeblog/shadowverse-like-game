@@ -2,26 +2,13 @@
     cardId: String!
     type: String!
     name: String!
-    cardType: CardTypeEnum!
+    cardType: String!
     cost: Int!
     attack: Int
     defense: Int
     description: String!
-    effectType: EffectTypeEnum
+    effectType: String!
     imageUrl: String
-}
-
-enum CardTypeEnum {
-    FOLLOWER
-    SPELL
-    AMULET
-}
-
-enum EffectTypeEnum {
-    DAMAGE
-    HEAL
-    BUFF
-    DEBUFF
 }
 
 type Player {
@@ -61,7 +48,7 @@ type MatchHistory {
     turnCount: Int!
     firstPlayerId: String!
     winnerId: String!
-    matchDate: String! # ISO 8601 format
+    matchDate: String!
 }
 
 type MatchCard {
@@ -98,6 +85,11 @@ type Query {
     getDeck(deckId: String!): Deck
     getMatchHistory(matchHistoryId: String!): MatchHistory
     getMatchStatus(matchStatusId: String!): MatchStatus
+    getAllCard(type: String!): [Card]
+    getAllPlayer(type: String!): [Player]
+    getAllDeck(type: String!): [Deck]
+    getAllMatchHistory(type: String!): [MatchHistory]
+    getAllMatchStatus(type: String!): [MatchStatus]
 }
 
 type Mutation {
@@ -110,24 +102,23 @@ type Mutation {
     createDeck(input: DeckInput!): Deck
     updateDeck(deckId: String!, input: DeckInput!): Deck
     deleteDeck(deckId: String!): Deck
+    createMatchHistory(input: MatchStatusInput!): MatchHistory
     createMatchStatus(input: MatchStatusInput!): MatchStatus
     updateMatchStatus(matchStatusId: String!, input: MatchStatusInput!): MatchStatus
 }
 
 input CardInput {
-    type: String!
-    name: String!
-    cardType: CardTypeEnum!
+    cardname: String!
+    cardType: String!
     cost: Int!
     attack: Int
     defense: Int
     description: String!
-    effectType: EffectTypeEnum
+    effectType: String!
     imageUrl: String
 }
 
 input PlayerInput {
-    type: String!
     username: String!
     exp: Int!
     level: Int!
@@ -136,13 +127,22 @@ input PlayerInput {
 }
 
 input DeckInput {
-    type: String!
     playerId: String!
     cards: [DeckCard!]!
 }
 
+input MatchHistoryInput {
+    player1Id: String!
+    player1Cards: [MatchCard!]!
+    player2Id: String!
+    player2Cards: [MatchCard!]!
+    turnCount: Int!
+    firstPlayerId: String!
+    winnerId: String!
+    matchDate: String!
+}
+
 input MatchStatusInput {
-    type: String!
     player1Id: String!
     player1Cards: [MatchCard!]!
     player1Hand: [String!]!
