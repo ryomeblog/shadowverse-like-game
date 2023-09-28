@@ -1,47 +1,27 @@
 import { util } from '@aws-appsync/utils';
 export function request(ctx) {
   console.log('-----update start-----');
-  const { playerId } = ctx.args.playerId;
-  const { username, exp, level, ownedCards, ownedDecks } = ctx.args.input
+  const { deckId } = ctx.args;
+  const input = ctx.args.input;
   let expressionTxt = 'SET ';
   let expressionNames = {};
   let expressionValues = {};
 
-  if (!!username) {
-    expressionTxt += '#username = :username,';
-    expressionNames['#username'] = 'username';
-    expressionValues[':username'] = { 'S': username }
-  }
+  const attributes = ['playerId', 'cards'];
 
-  if (!!exp) {
-    expressionTxt += '#exp = :exp,';
-    expressionNames['#exp'] = 'exp';
-    expressionValues[':exp'] = { 'N': exp }
-  }
-
-  if (!!level) {
-    expressionTxt += '#level = :level,';
-    expressionNames['#level'] = 'level';
-    expressionValues[':level'] = { 'N': level }
-  }
-
-  if (!!ownedCards) {
-    expressionTxt += '#ownedCards = :ownedCards,';
-    expressionNames['#ownedCards'] = 'ownedCards';
-    expressionValues[':ownedCards'] = { 'L': ownedCards }
-  }
-
-  if (!!ownedDecks) {
-    expressionTxt += '#ownedDecks = :ownedDecks,';
-    expressionNames['#ownedDecks'] = 'ownedDecks';
-    expressionValues[':ownedDecks'] = { 'L': ownedDecks }
+  for (const key of attributes) {
+    if (input[key]) {
+      expressionTxt += `#${key} = :${key},`;
+      expressionNames[`#${key}`] = key;
+      expressionValues[`:${key}`] = util.dynamodb.toMapValues(input[key]);
+    }
   }
 
   expressionTxt = expressionTxt.substring(0, expressionTxt.length - 1);
 
   return {
     operation: 'UpdateItem',
-    key: util.dynamodb.toMapValues({ playerId }),
+    key: util.dynamodb.toMapValues({ deckId }),
     update: {
       expression: expressionTxt,
       expressionNames: expressionNames,

@@ -7,7 +7,7 @@ export function request(ctx) {
 
   expressionTxt += '#type = :type';
   expressionNames['#type'] = 'type';
-  expressionValues[':type'] = util.dynamodb.toMapValues('Card');
+  expressionValues[':type'] = util.dynamodb.toMapValues('Deck');
 
   return {
     operation: 'Query',

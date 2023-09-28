@@ -1,13 +1,13 @@
 import { util } from '@aws-appsync/utils';
 export function request(ctx) {
   console.log('-----update start-----');
-  const { cardId } = ctx.args;
+  const { matchStatusId } = ctx.args;
   const input = ctx.args.input;
   let expressionTxt = 'SET ';
   let expressionNames = {};
   let expressionValues = {};
 
-  const attributes = ['cardname', 'cardType', 'cost', 'attack', 'defense', 'description', 'effectType', 'imageUrl'];
+  const attributes = ['player1Id', 'player1Lp', 'player1Cost', 'player1MaxLp', 'player1MaxCost', 'player1field', 'player1Hand', 'player1Deck', 'player1Discard', 'player2Id', 'player2Lp', 'player2Cost', 'player2MaxLp', 'player2MaxCost', 'player2field', 'player2Hand', 'player2Deck', 'player2Discard', 'turnCount', 'firstPlayerId', 'winnerId'];
 
   for (const key of attributes) {
     if (input[key]) {
@@ -21,7 +21,7 @@ export function request(ctx) {
 
   return {
     operation: 'UpdateItem',
-    key: util.dynamodb.toMapValues({ cardId }),
+    key: util.dynamodb.toMapValues({ matchStatusId }),
     update: {
       expression: expressionTxt,
       expressionNames: expressionNames,

@@ -79,7 +79,7 @@ export class ShadowverseCdkStack extends cdk.Stack {
     // billingModeは課金の方法を指定します。PAY_PER_REQUESTは読み書きの操作ごとに課金されます。
     const table = new ddb.Table(this, `${props.appname}Table`, {
       partitionKey: { name: 'id', type: ddb.AttributeType.STRING },
-      sortKey: { name: 'type', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'type', type: ddb.AttributeType.STRING },
       billingMode: ddb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -104,19 +104,91 @@ export class ShadowverseCdkStack extends cdk.Stack {
     const resolvers = [
       {
         typeName: 'Query',
-        fieldName: 'listTasks'
+        fieldName: 'getCard'
+      },
+      {
+        typeName: 'Query',
+        fieldName: 'getPlayer'
+      },
+      {
+        typeName: 'Query',
+        fieldName: 'getDeck'
+      },
+      {
+        typeName: 'Query',
+        fieldName: 'getMatchHistory'
+      },
+      {
+        typeName: 'Query',
+        fieldName: 'getMatchStatus'
+      },
+      {
+        typeName: 'Query',
+        fieldName: 'getAllCard'
+      },
+      {
+        typeName: 'Query',
+        fieldName: 'getAllPlayer'
+      },
+      {
+        typeName: 'Query',
+        fieldName: 'getAllDeck'
+      },
+      {
+        typeName: 'Query',
+        fieldName: 'getAllMatchHistory'
+      },
+      {
+        typeName: 'Query',
+        fieldName: 'getAllMatchStatus'
       },
       {
         typeName: 'Mutation',
-        fieldName: 'createTask'
+        fieldName: 'createCard'
       },
       {
         typeName: 'Mutation',
-        fieldName: 'updateTask'
+        fieldName: 'createPlayer'
       },
       {
         typeName: 'Mutation',
-        fieldName: 'deleteTask'
+        fieldName: 'createDeck'
+      },
+      {
+        typeName: 'Mutation',
+        fieldName: 'createMatchHistory'
+      },
+      {
+        typeName: 'Mutation',
+        fieldName: 'createMatchStatus'
+      },
+      {
+        typeName: 'Mutation',
+        fieldName: 'updateCard'
+      },
+      {
+        typeName: 'Mutation',
+        fieldName: 'updatePlayer'
+      },
+      {
+        typeName: 'Mutation',
+        fieldName: 'updateDeck'
+      },
+      {
+        typeName: 'Mutation',
+        fieldName: 'updateMatchStatus'
+      },
+      {
+        typeName: 'Mutation',
+        fieldName: 'deleteCard'
+      },
+      {
+        typeName: 'Mutation',
+        fieldName: 'deletePlayer'
+      },
+      {
+        typeName: 'Mutation',
+        fieldName: 'deleteDeck'
       },
     ];
 
