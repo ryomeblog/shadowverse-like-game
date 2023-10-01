@@ -190,6 +190,10 @@ export class ShadowverseCdkStack extends cdk.Stack {
         typeName: 'Mutation',
         fieldName: 'deleteDeck'
       },
+      {
+        typeName: 'Subscription',
+        fieldName: 'onMatchStatusUpdated'
+      },
     ];
 
     // 各リゾルバに対応するAppSyncのFunctionとResolverを作成します。

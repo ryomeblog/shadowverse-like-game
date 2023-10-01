@@ -2,10 +2,10 @@ import { util } from '@aws-appsync/utils';
 export function request(ctx) {
   console.log('-----start-----');
   const input = ctx.args.input;
-  input.type = 'player';
+  input.type = 'Player';
   return {
     operation: 'PutItem',
-    key: util.dynamodb.toMapValues({ 'id': util.autoUlid() }),
+    key: util.dynamodb.toMapValues({ 'id': ctx.identity.sub }),
     attributeValues: util.dynamodb.toMapValues(input),
   };
 }

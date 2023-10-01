@@ -4,6 +4,9 @@ export function request(ctx) {
   const input = ctx.args.input;
   input.type = 'MatchStatus';
   input.matchDate = util.time.nowEpochSeconds();
+  input.player1Id = ctx.identity.sub;
+  input.player2Id = '';
+  input.firstPlayerId = ctx.identity.sub;
   return {
     operation: 'PutItem',
     key: util.dynamodb.toMapValues({ 'id': util.autoUlid() }),

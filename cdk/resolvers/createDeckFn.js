@@ -3,6 +3,7 @@ export function request(ctx) {
   console.log('-----start-----');
   const input = ctx.args.input;
   input.type = 'Deck';
+  input.playerId = ctx.identity.sub;
   return {
     operation: 'PutItem',
     key: util.dynamodb.toMapValues({ 'id': util.autoUlid() }),

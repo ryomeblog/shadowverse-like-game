@@ -1,10 +1,9 @@
 import { util } from '@aws-appsync/utils';
 export function request(ctx) {
   console.log('-----start-----');
-  const { playerId } = ctx.args;
   return {
     operation: 'DeleteItem',
-    key: util.dynamodb.toMapValues({ playerId }),
+    key: util.dynamodb.toMapValues({ id: ctx.identity.sub, type: 'Player' }),
   };
 }
 export function response(ctx) {

@@ -4,7 +4,7 @@ export function request(ctx) {
   const { deckId } = ctx.args;
   return {
     operation: 'DeleteItem',
-    key: util.dynamodb.toMapValues({ deckId }),
+    key: util.dynamodb.toMapValues({ id: deckId, type: 'Deck' }),
   };
 }
 export function response(ctx) {

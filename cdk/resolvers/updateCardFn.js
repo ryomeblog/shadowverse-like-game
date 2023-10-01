@@ -10,10 +10,10 @@ export function request(ctx) {
   const attributes = ['cardname', 'cardType', 'cost', 'attack', 'defense', 'description', 'effectType', 'imageUrl'];
 
   for (const key of attributes) {
-    if (input[key]) {
+    if (input[key] !== undefined && input[key] !== null) {
       expressionTxt += `#${key} = :${key},`;
       expressionNames[`#${key}`] = key;
-      expressionValues[`:${key}`] = util.dynamodb.toMapValues(input[key]);
+      expressionValues[`:${key}`] = util.dynamodb.toMapValues({[key]: input[key]})[key];
     }
   }
 
@@ -21,7 +21,7 @@ export function request(ctx) {
 
   return {
     operation: 'UpdateItem',
-    key: util.dynamodb.toMapValues({ cardId }),
+    key: util.dynamodb.toMapValues({ id: cardId, type: 'Card' }),
     update: {
       expression: expressionTxt,
       expressionNames: expressionNames,

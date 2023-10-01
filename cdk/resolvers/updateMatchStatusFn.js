@@ -10,10 +10,10 @@ export function request(ctx) {
   const attributes = ['player1Id', 'player1Lp', 'player1Cost', 'player1MaxLp', 'player1MaxCost', 'player1field', 'player1Hand', 'player1Deck', 'player1Discard', 'player2Id', 'player2Lp', 'player2Cost', 'player2MaxLp', 'player2MaxCost', 'player2field', 'player2Hand', 'player2Deck', 'player2Discard', 'turnCount', 'firstPlayerId', 'winnerId'];
 
   for (const key of attributes) {
-    if (input[key]) {
+    if (input[key] !== undefined && input[key] !== null) {
       expressionTxt += `#${key} = :${key},`;
       expressionNames[`#${key}`] = key;
-      expressionValues[`:${key}`] = util.dynamodb.toMapValues(input[key]);
+      expressionValues[`:${key}`] = util.dynamodb.toMapValues({[key]: input[key]})[key];
     }
   }
 
@@ -21,7 +21,7 @@ export function request(ctx) {
 
   return {
     operation: 'UpdateItem',
-    key: util.dynamodb.toMapValues({ matchStatusId }),
+    key: util.dynamodb.toMapValues({ id: matchStatusId, type: 'MatchStatus' }),
     update: {
       expression: expressionTxt,
       expressionNames: expressionNames,

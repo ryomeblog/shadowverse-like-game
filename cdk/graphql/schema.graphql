@@ -5,12 +5,13 @@ schema {
 }
 
 type Card {
-  cardId: String!
+  id: String!
   type: String!
   cardname: String!
   cardType: String!
   cost: Int!
   attack: Int
+	attackStatus: Boolean
   defense: Int
   description: String!
   effectType: String!
@@ -18,34 +19,30 @@ type Card {
 }
 
 type Player {
-  playerId: String!
+  id: String!
   type: String!
   username: String!
   exp: Int!
   level: Int!
-  ownedCards: [String!]!
-  ownedDecks: [String!]!
+  ownedCards: [Card]!
+  ownedDecks: [Card]!
 }
 
 type Deck {
-  deckId: String!
+  id: String!
   type: String!
+  deckname: String!
   playerId: String!
-  cards: [DeckCard!]!
-}
-
-type DeckCard {
-  cardId: String!
-  quantity: Int!
+  cards: [Card]!
 }
 
 type MatchHistory {
-  matchHistoryId: String!
+  id: String!
   type: String!
   player1Id: String!
-  player1Deck: [DeckCard!]!
+  player1Deck: [Card!]!
   player2Id: String!
-  player2Deck: [DeckCard!]!
+  player2Deck: [Card!]!
   turnCount: Int!
   firstPlayerId: String!
   winnerId: String!
@@ -53,26 +50,26 @@ type MatchHistory {
 }
 
 type MatchStatus {
-  matchStatusId: String!
+  id: String!
   type: String!
   player1Id: String!
   player1Lp: Int!
   player1Cost: Int!
   player1MaxLp: Int!
   player1MaxCost: Int!
-  player1field: [Card!]!
-  player1Hand: [String!]!
-  player1Deck: [DeckCard!]!
-  player1Discard: [String!]!
+  player1field: [Card]!
+  player1Hand: [Card]!
+  player1Deck: [Card]!
+  player1Discard: [Card]!
   player2Id: String!
   player2Lp: Int!
   player2Cost: Int!
   player2MaxLp: Int!
   player2MaxCost: Int!
-  player2field: [Card!]!
-  player2Hand: [String!]!
-  player2Deck: [DeckCard!]!
-  player2Discard: [String!]!
+  player2field: [Card]!
+  player2Hand: [Card]!
+  player2Deck: [Card]!
+  player2Discard: [Card]!
   turnCount: Int!
   firstPlayerId: String!
   winnerId: String
@@ -81,7 +78,7 @@ type MatchStatus {
 
 type Query {
   getCard(cardId: String!): Card
-  getPlayer(playerId: String!): Player
+  getPlayer: Player
   getDeck(deckId: String!): Deck
   getMatchHistory(matchHistoryId: String!): MatchHistory
   getMatchStatus(matchStatusId: String!): MatchStatus
@@ -96,14 +93,14 @@ type Mutation {
   createCard(input: CardInput!): Card
   createPlayer(input: PlayerInput!): Player
   createDeck(input: DeckInput!): Deck
-  createMatchHistory(input: MatchStatusInput!): MatchHistory
+  createMatchHistory(input: MatchHistoryInput!): MatchHistory
   createMatchStatus(input: MatchStatusInput!): MatchStatus
   updateCard(cardId: String!, input: CardInput!): Card
-  updatePlayer(playerId: String!, input: PlayerInput!): Player
+  updatePlayer(input: PlayerInput!): Player
   updateDeck(deckId: String!, input: DeckInput!): Deck
-  updateMatchStatus(matchStatusId: String!, input: MatchStatusInput!): MatchStatus
+  updateMatchStatus(matchStatusId: String!, input: UpdateMatchStatusInput!): MatchStatus
   deleteCard(cardId: String!): Card
-  deletePlayer(playerId: String!): Player
+  deletePlayer: Player
   deleteDeck(deckId: String!): Deck
 }
 
@@ -118,61 +115,8 @@ input CardInput {
   imageUrl: String
 }
 
-input PlayerInput {
-  username: String!
-  exp: Int!
-  level: Int!
-  ownedCards: [String!]!
-  ownedDecks: [String!]!
-}
-
-input DeckInput {
-  playerId: String!
-  cards: [DeckCardInput!]!
-}
-
-input MatchHistoryInput {
-  player1Id: String!
-  player1Deck: [DeckCardInput!]!
-  player2Id: String!
-  player2Deck: [DeckCardInput!]!
-  turnCount: Int!
-  firstPlayerId: String!
-  winnerId: String!
-  matchDate: String!
-}
-
-input MatchStatusInput {
-  player1Id: String!
-  player1Lp: Int!
-  player1Cost: Int!
-  player1MaxLp: Int!
-  player1MaxCost: Int!
-  player1field: [CardFieldInput!]!
-  player1Hand: [String!]!
-  player1Deck: [DeckCardInput!]!
-  player1Discard: [String!]!
-  player2Id: String!
-  player2Lp: Int!
-  player2Cost: Int!
-  player2MaxLp: Int!
-  player2MaxCost: Int!
-  player2field: [CardFieldInput!]!
-  player2Hand: [String!]!
-  player2Deck: [DeckCardInput!]!
-  player2Discard: [String!]!
-  turnCount: Int!
-  firstPlayerId: String!
-  winnerId: String
-}
-
-input DeckCardInput {
-  cardId: String!
-  quantity: Int!
-}
-
-input CardFieldInput {
-  cardId: String!
+input Cards {
+  id: String!
   type: String!
   cardname: String!
   cardType: String!
@@ -182,8 +126,79 @@ input CardFieldInput {
   description: String!
   effectType: String!
   imageUrl: String
+  attackStatus: Boolean
+}
+
+input PlayerInput {
+  username: String!
+  exp: Int!
+  level: Int!
+  ownedCards: [Cards]!
+  ownedDecks: [Cards]!
+}
+
+input DeckInput {
+  deckname: String!
+  cards: [Cards]!
+}
+
+input MatchHistoryInput {
+  player1Id: String!
+  player1Deck: [Cards]!
+  player2Id: String!
+  player2Deck: [Cards]!
+  turnCount: Int!
+  firstPlayerId: String!
+  winnerId: String!
+  matchDate: String!
+}
+
+input MatchStatusInput {
+  player1Lp: Int!
+  player1Cost: Int!
+  player1MaxLp: Int!
+  player1MaxCost: Int!
+  player1field: [Cards]!
+  player1Hand: [Cards]!
+  player1Deck: [Cards]!
+  player1Discard: [Cards]!
+  player2Lp: Int!
+  player2Cost: Int!
+  player2MaxLp: Int!
+  player2MaxCost: Int!
+  player2field: [Cards]!
+  player2Hand: [Cards]!
+  player2Deck: [Cards]!
+  player2Discard: [Cards]!
+  turnCount: Int!
+  winnerId: String
+}
+
+input UpdateMatchStatusInput {
+  player1Id: String!
+  player1Lp: Int!
+  player1Cost: Int!
+  player1MaxLp: Int!
+  player1MaxCost: Int!
+  player1field: [Cards]!
+  player1Hand: [Cards]!
+  player1Deck: [Cards]!
+  player1Discard: [Cards]!
+  player2Id: String!
+  player2Lp: Int!
+  player2Cost: Int!
+  player2MaxLp: Int!
+  player2MaxCost: Int!
+  player2field: [Cards]!
+  player2Hand: [Cards]!
+  player2Deck: [Cards]!
+  player2Discard: [Cards]!
+  turnCount: Int!
+  firstPlayerId: String!
+  winnerId: String
 }
 
 type Subscription {
-  onMatchStatusUpdated(matchStatusId: String!): MatchStatus @aws_subscribe(mutations: ["updateMatchStatus"])
+  onMatchStatusUpdated(id: String!): MatchStatus 
+    @aws_subscribe(mutations: ["updateMatchStatus"])
 }
