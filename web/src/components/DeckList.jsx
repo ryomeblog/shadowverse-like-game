@@ -73,13 +73,19 @@ const sortdeck = (deck, sortBy) => {
     cardname: (a, b) => a.cardname.localeCompare(b.cardname),
     attack: (a, b) => a.attack - b.attack,
     defense: (a, b) => a.defense - b.defense,
+    none: () => 0
   };
+
+  if (!sorter[sortBy]) {
+    console.warn('Invalid sortBy parameter provided. Returning original deck.');
+    return deck;
+  }
 
   return [...deck].sort(sorter[sortBy]);
 };
 
 const CardList = ({ deck, onCardClick }) => {
-  const [sortBy, setSortBy] = useState("cost");
+  const [sortBy, setSortBy] = useState("none");
   const sorteddeck = sortdeck(deck, sortBy);
 
   const handleSortChange = (event) => {
@@ -92,6 +98,7 @@ const CardList = ({ deck, onCardClick }) => {
         <FormControl variant="outlined" style={styles.sortFormControl}>
           <InputLabel>並び替え</InputLabel>
           <Select value={sortBy} onChange={handleSortChange} label="並び替え">
+            <MenuItem value="none">引き順</MenuItem>
             <MenuItem value="cost">コスト</MenuItem>
             <MenuItem value="cardname">カード名</MenuItem>
             <MenuItem value="attack">攻撃力</MenuItem>

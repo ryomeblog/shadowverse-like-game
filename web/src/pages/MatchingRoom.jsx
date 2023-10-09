@@ -46,7 +46,6 @@ const MatchingRoom = () => {
   const [isMatched, setIsMatched] = useState(false);
   const [matchStatusId, setMatchStatusId] = useState("");
   const [userSub, setUserSub] = useState("");
-  // const [selectedDeck, setSelectedDeck] = useState("");
   const [isMatchingStarted, setIsMatchingStarted] = useState(false);
   const [decks, setDecks] = useState([]);
   const [deckCards, setDeckCards] = useState([]);
@@ -275,6 +274,7 @@ const MatchingRoom = () => {
               color="primary"
               onClick={startMatching}
               style={{ marginTop: "20px" }}
+              disabled={!selectedDeckId}
             >
               デッキ選択
             </Button>

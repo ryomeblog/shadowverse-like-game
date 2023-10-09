@@ -4,7 +4,6 @@ import { Modal, Button, Typography } from "@mui/material";
 import PlayerInfo from "../components/PlayerInfo";
 import Field from "../components/Field";
 import Hand from "../components/Hand";
-import CardEffect from "../effect/CardEffect";
 import { useParams } from "react-router-dom";
 import { updateMatchStatus } from "../graphql/mutations";
 import { getMatchStatus } from "../graphql/queries";
@@ -57,11 +56,10 @@ const GameScreen = () => {
   const [showWinnerModal, setShowWinnerModal] = useState(false);
 
   const handToField = (index) => {
-    // 召喚処理
+    // fieldCardsとhandCardsのコピーを作成
     const fieldCardsCopy = [...player.fieldCards];
     const handCardsCopy = [...player.handCards];
-    const targetCardInfo = handCardsCopy[index];
-    const summonCost = targetCardInfo.cost;
+    const summonCost = handCardsCopy[index].cost;
 
     fieldCardsCopy.push(handCardsCopy[index]);
     handCardsCopy.splice(index, 1);
@@ -73,27 +71,14 @@ const GameScreen = () => {
       handCards: handCardsCopy,
     };
 
-    const afterEffect = CardEffect(
-      "summon",
-      targetCardInfo,
-      index,
-      null,
-      -1,
-      newPlayer,
-      opponent,
-      turnCnt,
-      gameWinnerId
-    );
-
-    setPlayer(afterEffect.player);
-    setOpponent(afterEffect.opponent);
+    setPlayer(newPlayer);
 
     API.graphql(
       graphqlOperation(updateMatchStatus, {
         matchStatusId: matchStatusId,
         input: changeFormatPlayerInfoToDb(
-          afterEffect.player,
-          afterEffect.opponent,
+          newPlayer,
+          opponent,
           turnCnt,
           gameWinnerId
         ),
@@ -102,29 +87,14 @@ const GameScreen = () => {
   };
 
   const turnEnd = () => {
-    const afterEffect = CardEffect(
-      "endphase",
-      null,
-      -1,
-      null,
-      -1,
-      player,
-      opponent,
-      turnCnt,
-      gameWinnerId
-    );
-
-    setPlayer(afterEffect.player);
-    setOpponent(afterEffect.opponent);
-
-    if (afterEffect.opponent.deckCards.length === 0) {
+    if (opponent.deckCards.length === 0) {
       setGameWinnerId(player.playerId);
       API.graphql(
         graphqlOperation(updateMatchStatus, {
           matchStatusId: matchStatusId,
           input: changeFormatPlayerInfoToDb(
-            afterEffect.player,
-            afterEffect.opponent,
+            player,
+            opponent,
             turnCnt,
             player.playerId
           ),
@@ -168,44 +138,24 @@ const GameScreen = () => {
     );
   };
 
-  const damageCalculation = (
-    attacker,
-    attackerIndex,
-    defender = null,
-    defenderIndex = null
-  ) => {
-    const afterEffect = CardEffect(
-      "endphase",
-      attacker,
-      attackerIndex,
-      defender,
-      defenderIndex,
-      player,
-      opponent,
-      turnCnt,
-      gameWinnerId
-    );
+  const damageCalculation = (attacker, attackerIndex, defender = null, defenderIndex = null) => {
     // プレイヤーへの攻撃
-    if (!afterEffect.targetCard) {
-      const newAttacker = { ...afterEffect.card, attackStatus: false };
-      const fieldCards = afterEffect.player.fieldCards;
-      fieldCards[afterEffect.cardIndex] = newAttacker;
+    if (!defender) {
+      const newAttacker = { ...attacker, attackStatus: false };
+      const fieldCards = player.fieldCards;
+      fieldCards[attackerIndex] = newAttacker;
       const newPlayer = {
-        ...afterEffect.player,
+        ...player,
         fieldCards: fieldCards,
       };
-      const opponentLp = afterEffect.opponent.lp - afterEffect.card.attack;
+      const opponentLp = opponent.lp - attacker.attack;
       const newOpponent = {
-        ...afterEffect.opponent,
+        ...opponent,
         lp: opponentLp,
       };
-      const winId =
-        opponentLp <= 0
-          ? afterEffect.player.playerId
-          : afterEffect.gameWinnerId;
       setPlayer(newPlayer);
       setOpponent(newOpponent);
-      setGameWinnerId(winId);
+      setGameWinnerId(opponentLp <= 0 ? player.playerId : gameWinnerId);
 
       API.graphql(
         graphqlOperation(updateMatchStatus, {
@@ -213,49 +163,45 @@ const GameScreen = () => {
           input: changeFormatPlayerInfoToDb(
             newPlayer,
             newOpponent,
-            afterEffect.turnCnt,
-            winId
+            turnCnt,
+            opponentLp <= 0 ? player.playerId : gameWinnerId
           ),
         })
       );
     } else {
       // フォロワーへの攻撃
-      const newAttacker = { ...afterEffect.card };
-      const newDefender = { ...afterEffect.targetCard };
+      const newAttacker = { ...attacker };
+      const newDefender = { ...defender };
 
       newDefender.defense -= newAttacker.attack;
       newAttacker.defense -= newDefender.attack;
       newAttacker.attackStatus = false;
 
-      let newPlayer = afterEffect.player;
-      let newOpponent = afterEffect.opponent;
+      let newPlayer = player;
+      let newOpponent = opponent;
 
       // 攻撃者の処理
       if (newAttacker.defense <= 0) {
         newAttacker.defense = 0;
         newPlayer = {
-          ...afterEffect.player,
-          fieldCards: afterEffect.player.fieldCards.filter(
-            (_, index) => index !== afterEffect.cardIndex
-          ),
-          discardCards: [...afterEffect.player.discardCards, newAttacker],
+          ...player,
+          fieldCards: player.fieldCards.filter((_, index) => index !== attackerIndex),
+          discardCards: [...player.discardCards, newAttacker],
         };
       } else {
-        newPlayer.fieldCards[afterEffect.cardIndex] = newAttacker;
+        newPlayer.fieldCards[attackerIndex] = newAttacker;
       }
 
       // 防御者の処理
       if (newDefender.defense <= 0) {
         newDefender.defense = 0;
         newOpponent = {
-          ...afterEffect.opponent,
-          fieldCards: afterEffect.opponent.fieldCards.filter(
-            (_, index) => index !== afterEffect.targetIndex
-          ),
-          discardCards: [...afterEffect.opponent.discardCards, newDefender],
+          ...opponent,
+          fieldCards: opponent.fieldCards.filter((_, index) => index !== defenderIndex),
+          discardCards: [...opponent.discardCards, newDefender],
         };
       } else {
-        newOpponent.fieldCards[afterEffect.targetIndex] = newDefender;
+        newOpponent.fieldCards[defenderIndex] = newDefender;
       }
 
       setPlayer(newPlayer);
@@ -267,8 +213,8 @@ const GameScreen = () => {
           input: changeFormatPlayerInfoToDb(
             newPlayer,
             newOpponent,
-            afterEffect.turnCnt,
-            afterEffect.gameWinnerId
+            turnCnt,
+            gameWinnerId
           ),
         })
       );
@@ -326,6 +272,7 @@ const GameScreen = () => {
     newWinnerId
   ) => {
     let inputPlayerData = {};
+    console.log("newPlayer.cost", newPlayer.cost);
     if (p1orp2 === "p1") {
       inputPlayerData = {
         player1Id: newPlayer.playerId,
@@ -480,6 +427,7 @@ const GameScreen = () => {
             matchStatusId: matchStatusId,
           })
         );
+        console.log("matchStatusData", matchStatusData);
         const {
           player1Id,
           player1Lp,

@@ -91,9 +91,16 @@ const styles = {
     marginLeft: "auto",
     marginRight: "auto",
   },
+  modalCardImage: {
+    width: "200px",
+    height: "200px",
+    whiteSpace: "nowrap", // 改行を防ぐ
+    overflow: "hidden", // 要素の外部にはみ出さないようにする
+    textOverflow: "ellipsis", // はみ出したテキストを省略記号で表示
+  },
 };
 
-const Hand = ({ player, isMyTurn, handToField }) => {
+const Hand = ({ cards, player, isMyTurn, handToField }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
   const [selectedCardIndex, setSelectedCardIndex] = useState(null);
@@ -160,9 +167,12 @@ const Hand = ({ player, isMyTurn, handToField }) => {
             horizontal: "center",
           }}
         >
-          {isMyTurn && selectedCard && selectedCard.cost <= player.cost && (
-            <Button onClick={handleSummon}>召喚</Button>
-          )}
+          {cards.length < 5 &&
+            isMyTurn &&
+            selectedCard &&
+            selectedCard.cost <= player.cost && (
+              <Button onClick={handleSummon}>召喚</Button>
+            )}
           <Button onClick={handleShowDetails}>詳細</Button>
           <Button onClick={handleClose}>キャンセル</Button>
         </Popover>
@@ -172,7 +182,11 @@ const Hand = ({ player, isMyTurn, handToField }) => {
             {/* Example card details */}
             {selectedCard && (
               <>
-                <img src={selectedCard.imageUrl} alt="card" />
+                <img
+                  style={styles.modalCardImage}
+                  src={selectedCard.imageUrl}
+                  alt="card"
+                />
 
                 <div style={styles.fieldWrapper}>
                   <div style={styles.zoneTitle}>{selectedCard.cardname}</div>

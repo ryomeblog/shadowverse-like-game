@@ -92,23 +92,46 @@ const styles = {
     boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", // 任意の影を追加
     outline: "none",
   },
+  modalCardImage: {
+    width: "100px",
+    height: "100px",
+    whiteSpace: "nowrap", // 改行を防ぐ
+    overflow: "hidden", // 要素の外部にはみ出さないようにする
+    textOverflow: "ellipsis", // はみ出したテキストを省略記号で表示
+  },
+  modalCardInfoImage: {
+    width: "200px",
+    height: "200px",
+    whiteSpace: "nowrap", // 改行を防ぐ
+    overflow: "hidden", // 要素の外部にはみ出さないようにする
+    textOverflow: "ellipsis", // はみ出したテキストを省略記号で表示
+  },
 };
 
-const Field = ({ cards, opponentCards, myField, isMyTurn, damageCalculation }) => {
+const Field = ({
+  cards,
+  opponentCards,
+  myField,
+  isMyTurn,
+  damageCalculation,
+}) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
   const [showAttackModal, setShowAttackModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedTargetIndex, setSelectedTargetIndex] = useState(0);
+  const [selectedTargetIndex, setSelectedTargetIndex] = useState(-1);
 
-  const handleClick = (event, card) => {
+  const handleClick = (event, card, index) => {
     setAnchorEl(event.currentTarget);
     setSelectedCard(card);
+    setSelectedCardIndex(index);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
     setSelectedCard(null);
+    setSelectedCardIndex(-1);
   };
 
   const handleAttack = () => {
@@ -141,14 +164,18 @@ const Field = ({ cards, opponentCards, myField, isMyTurn, damageCalculation }) =
   };
 
   const handleAttackTargetConfirm = () => {
-    // ここで攻撃対象として選択されたカードに対する処理を行います
-    // 例: attack(opponentFieldCards[selectedTargetIndex])
+    setSelectedTargetIndex(-1);
     handleCloseAttackModal();
     handleClose();
-    if(selectedTargetIndex === -1){
-      damageCalculation(selectedCard);
-    }else{
-      damageCalculation(selectedCard, opponentCards[selectedTargetIndex]);
+    if (selectedTargetIndex === -1) {
+      damageCalculation(selectedCard, selectedCardIndex);
+    } else {
+      damageCalculation(
+        selectedCard,
+        selectedCardIndex,
+        opponentCards[selectedTargetIndex],
+        selectedTargetIndex
+      );
     }
   };
 
@@ -166,7 +193,9 @@ const Field = ({ cards, opponentCards, myField, isMyTurn, damageCalculation }) =
             key={index}
             variant="outlined"
             style={styles.cardSlot}
-            onClick={cards[index] ? (e) => handleClick(e, cards[index]) : null}
+            onClick={
+              cards[index] ? (e) => handleClick(e, cards[index], index) : null
+            }
           >
             {cards[index] ? (
               <div className="card-content">
@@ -216,7 +245,11 @@ const Field = ({ cards, opponentCards, myField, isMyTurn, damageCalculation }) =
             {selectedTargetIndex === -1 ? (
               <>
                 <h2>相手プレイヤー</h2>
-                <img src="/img/player.png" alt="card" />
+                <img
+                  src="/img/player.png"
+                  alt="card"
+                  style={styles.modalCardImage}
+                />
               </>
             ) : (
               <>
@@ -282,7 +315,11 @@ const Field = ({ cards, opponentCards, myField, isMyTurn, damageCalculation }) =
           {/* Example card details */}
           {selectedCard && (
             <>
-              <img src={selectedCard.imageUrl} alt="card" />
+              <img
+                style={styles.modalCardInfoImage}
+                src={selectedCard.imageUrl}
+                alt="card"
+              />
               <h3>{selectedCard.cardname}</h3>
               <p>
                 ATK: {selectedCard.attack} / DEF: {selectedCard.defense}

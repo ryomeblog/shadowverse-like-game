@@ -11,11 +11,17 @@ import {
 } from "@mui/material";
 import CardList from "../components/CardList";
 import DeckList from "../components/DeckList";
-import { updateDeck } from "../graphql/mutations";
+import defaultDeck from '../config/default.json';
+import { createDeck, updateDeck } from "../graphql/mutations";
 import { getDeck, getAllCard, getAllDeck } from "../graphql/queries";
 import { useNavigate } from "react-router-dom";
 
 const styles = {
+  modalCardImage: { 
+    width: "150px", 
+    height: "150px", 
+    margin: "20px 0" 
+  },
   modalContent: {
     position: "absolute",
     top: "10%",
@@ -51,7 +57,8 @@ const DeckEditingScreen = () => {
   const [deckCards, setDeckCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
   const [selectedDeckId, setSelectedDeckId] = useState("");
-  const [deckname, setDeckname] = useState("");
+  const [updateDeckname, setUpdateDeckname] = useState("");
+  const [createDeckname, setCreateDeckname] = useState("");
   const [isCardList, setIsCardList] = useState(false);
 
   const handleCardClickDeck = (card) => {
@@ -106,10 +113,23 @@ const DeckEditingScreen = () => {
       );
       const deckCardsList = deckData.data.getDeck;
       setDeckCards(deckCardsList.cards);
-      setDeckname(deckCardsList.deckname);
+      setUpdateDeckname(deckCardsList.deckname);
     } catch (error) {
       console.error("Error fetching cards", error);
     }
+  };
+
+  const handleCreateDeck = async () => {
+    await API.graphql(
+      graphqlOperation(createDeck, {
+        input: {
+          deckname: createDeckname,
+          cards: defaultDeck,
+        },
+      })
+    );
+    fetchDecks();
+    alert("デッキを作成しました。");
   };
 
   const handleUpdateDeck = async () => {
@@ -135,11 +155,12 @@ const DeckEditingScreen = () => {
           graphqlOperation(updateDeck, {
             deckId: selectedDeckId,
             input: {
-              deckname: deckname,
+              deckname: updateDeckname,
               cards: input,
             },
           })
         );
+        fetchDecks();
         alert("デッキを更新しました。");
       } catch (error) {
         console.error("Error updating deck", error);
@@ -148,27 +169,28 @@ const DeckEditingScreen = () => {
       alert("デッキ枚数は20枚でなければいけません。");
     }
   };
+  const fetchCards = async () => {
+    try {
+      const cardData = await API.graphql(graphqlOperation(getAllCard));
+      const cardList = cardData.data.getAllCard;
+      setCards(cardList);
+    } catch (error) {
+      console.error("Error fetching cards", error);
+    }
+  };
+  const fetchDecks = async () => {
+    try {
+      const deckData = await API.graphql(graphqlOperation(getAllDeck));
+      const deckList = deckData.data.getAllDeck;
+      setDecks(deckList);
+      console.log(JSON.stringify(deckList));
+    } catch (error) {
+      console.error("Error fetching decks", error);
+    }
+  };
 
   // 初期化時にカード一覧を取得
   useEffect(() => {
-    const fetchCards = async () => {
-      try {
-        const cardData = await API.graphql(graphqlOperation(getAllCard));
-        const cardList = cardData.data.getAllCard;
-        setCards(cardList);
-      } catch (error) {
-        console.error("Error fetching cards", error);
-      }
-    };
-    const fetchDecks = async () => {
-      try {
-        const deckData = await API.graphql(graphqlOperation(getAllDeck));
-        const deckList = deckData.data.getAllDeck;
-        setDecks(deckList);
-      } catch (error) {
-        console.error("Error fetching decks", error);
-      }
-    };
 
     fetchCards();
     fetchDecks();
@@ -176,7 +198,7 @@ const DeckEditingScreen = () => {
 
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12}>
+      <Grid item xs={6}>
         <Button
           variant="contained"
           color="secondary"
@@ -187,11 +209,26 @@ const DeckEditingScreen = () => {
         </Button>
       </Grid>
       <Grid item xs={6}>
+          <TextField
+            label="デッキ名"
+            variant="outlined"
+            value={createDeckname}
+            onChange={(e) => setCreateDeckname(e.target.value)}
+          />
+        <Button
+            variant="contained"
+            color="primary"
+            onClick={handleCreateDeck}
+          >
+            デッキ作成
+          </Button>
+      </Grid>
+      <Grid item xs={12} sm={12} md={6}>
         <Typography variant="h5">カード一覧</Typography>
         <br />
         <CardList cards={cards} onCardClick={handleCardClickList} />
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={12} sm={12} md={6}>
         <Typography variant="h5">
           デッキ
           <Select
@@ -212,8 +249,8 @@ const DeckEditingScreen = () => {
           <TextField
             label="デッキ名"
             variant="outlined"
-            value={deckname}
-            onChange={(e) => setDeckname(e.target.value)}
+            value={updateDeckname}
+            onChange={(e) => setUpdateDeckname(e.target.value)}
           />
           <Button
             variant="contained"
@@ -232,7 +269,7 @@ const DeckEditingScreen = () => {
         <div style={styles.modalContent}>
           {selectedCard && (
             <>
-              <img src={selectedCard.imageUrl} alt="card" />
+              <img src={selectedCard.imageUrl} alt="card" style={styles.modalCardImage} />
               <div style={styles.fieldWrapper}>
                 <div style={styles.zoneTitle}>{selectedCard.cardname}</div>
                 <div style={styles.fieldWrapper}>

@@ -13,6 +13,11 @@ const styles = {
     height: "100%",
     objectFit: "cover",
   },
+  modalCardImage: {
+    width: "200px",
+    height: "200px",
+    objectFit: "cover",
+  },
   modalContent: {
     position: "absolute",
     top: "10%",
@@ -113,7 +118,7 @@ const CardCreationScreen = () => {
         <div style={styles.modalContent}>
           {selectedCard && (
             <>
-              <img src={selectedCard.imageUrl} alt="card" />
+              <img src={selectedCard.imageUrl} alt="card" style={styles.modalCardImage} />
 
               <div style={styles.fieldWrapper}>
                 <div style={styles.zoneTitle}>{selectedCard.cardname}</div>
