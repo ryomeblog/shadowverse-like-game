@@ -118,29 +118,29 @@ const GameScreen = () => {
     setOpponent(afterEffect.opponent);
 
     if (afterEffect.opponent.deckCards.length === 0) {
-      setGameWinnerId(player.playerId);
+      setGameWinnerId(afterEffect.player.playerId);
       API.graphql(
         graphqlOperation(updateMatchStatus, {
           matchStatusId: matchStatusId,
           input: changeFormatPlayerInfoToDb(
             afterEffect.player,
             afterEffect.opponent,
-            turnCnt,
-            player.playerId
+            afterEffect.turnCnt,
+            afterEffect.player.playerId
           ),
         })
       );
       return;
     }
 
-    const updatedFieldCards = opponent.fieldCards.map((card) => {
+    const updatedFieldCards = afterEffect.opponent.fieldCards.map((card) => {
       return { ...card, attackStatus: true };
     });
-    const updatedDeckCards = [...opponent.deckCards];
+    const updatedDeckCards = [...afterEffect.opponent.deckCards];
     const topDeckCard = updatedDeckCards.shift();
-    const updatedHandCards = [...opponent.handCards, topDeckCard];
-    const updatedTurnCnt = turnCnt + 1;
-    const updatedMaxCost = opponent.maxCost + 1;
+    const updatedHandCards = [...afterEffect.opponent.handCards, topDeckCard];
+    const updatedTurnCnt = afterEffect.turnCnt + 1;
+    const updatedMaxCost = afterEffect.opponent.maxCost + 1;
     const updatedCost = updatedMaxCost;
 
     const newOpponent = {
@@ -159,10 +159,10 @@ const GameScreen = () => {
       graphqlOperation(updateMatchStatus, {
         matchStatusId: matchStatusId,
         input: changeFormatPlayerInfoToDb(
-          player,
+          afterEffect.player,
           newOpponent,
           updatedTurnCnt,
-          gameWinnerId
+          afterEffect.gameWinnerId
         ),
       })
     );
@@ -175,7 +175,7 @@ const GameScreen = () => {
     defenderIndex = null
   ) => {
     const afterEffect = CardEffect(
-      "endphase",
+      "battle",
       attacker,
       attackerIndex,
       defender,
@@ -625,16 +625,8 @@ const GameScreen = () => {
         turnEnd={turnEnd}
       />
       <Field
-        cards={opponent.fieldCards}
-        opponentCards={opponent.fieldCards}
-        myField={false}
-        isMyTurn={isMyTurn}
-        damageCalculation={damageCalculation}
-      />
-      <Field
         cards={player.fieldCards}
         opponentCards={opponent.fieldCards}
-        myField={true}
         isMyTurn={isMyTurn}
         damageCalculation={damageCalculation}
       />

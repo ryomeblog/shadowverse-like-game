@@ -44,7 +44,16 @@ const MainMenu = () => {
             variant="contained"
             onClick={() => navigate("/match")}
           >
-            対戦
+          対戦
+          </Button>
+        </Grid>
+        <Grid item>
+          <Button
+            style={styles.button}
+            variant="contained"
+            onClick={() => navigate("/npcmatch")}
+          >
+            NPC対戦
           </Button>
         </Grid>
         <Grid item>

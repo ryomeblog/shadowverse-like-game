@@ -111,7 +111,6 @@ const styles = {
 const Field = ({
   cards,
   opponentCards,
-  myField,
   isMyTurn,
   damageCalculation,
 }) => {
@@ -183,60 +182,111 @@ const Field = ({
   const id = open ? "simple-popover" : undefined;
 
   return (
-    <div style={styles.fieldWrapper}>
-      <div style={styles.zoneTitle}>
-        {myField ? "自分のフィールド" : "相手フィールド"}
-      </div>
-      <div style={styles.fieldContainer}>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <Card
-            key={index}
-            variant="outlined"
-            style={styles.cardSlot}
-            onClick={
-              cards[index] ? (e) => handleClick(e, cards[index], index) : null
-            }
-          >
-            {cards[index] ? (
-              <div className="card-content">
-                <img
-                  src={cards[index].imageUrl}
-                  alt="card"
-                  style={styles.cardImage}
-                />
-                <div style={styles.cardOverlay}>
-                  {cards[index].attack} / {cards[index].defense}
+    <>
+      <div style={styles.fieldWrapper}>
+        <div style={styles.zoneTitle}>相手のフィールド</div>
+        <div style={styles.fieldContainer}>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Card
+              key={index}
+              variant="outlined"
+              style={styles.cardSlot}
+              onClick={
+                opponentCards[index] ? (e) => handleClick(e, opponentCards[index], index) : null
+              }
+            >
+              {opponentCards[index] ? (
+                <div className="card-content">
+                  <img
+                    src={opponentCards[index].imageUrl}
+                    alt="card"
+                    style={styles.cardImage}
+                  />
+                  <div style={styles.cardOverlay}>
+                    {opponentCards[index].attack} / {opponentCards[index].defense}
+                  </div>
+                  <div style={styles.costCircle}>{opponentCards[index].cost}</div>
+                  <div style={styles.cardName}>{opponentCards[index].cardname}</div>
                 </div>
-                <div style={styles.costCircle}>{cards[index].cost}</div>
-                <div style={styles.cardName}>{cards[index].cardname}</div>
-              </div>
-            ) : (
-              <div style={styles.noCard}>No Card</div>
-            )}
-          </Card>
-        ))}
+              ) : (
+                <div style={styles.noCard}>No Card</div>
+              )}
+            </Card>
+          ))}
+        </div>
+
+        <Popover
+          id={id}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+        >
+          <Button onClick={handleShowDetails}>詳細</Button>
+          <Button onClick={handleClose}>キャンセル</Button>
+        </Popover>
       </div>
 
-      <Popover
-        id={id}
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
-      >
-        {isMyTurn && myField && selectedCard?.attackStatus && (
-          <Button onClick={handleAttack}>攻撃</Button>
-        )}
-        <Button onClick={handleShowDetails}>詳細</Button>
-        <Button onClick={handleClose}>キャンセル</Button>
-      </Popover>
+      <div style={styles.fieldWrapper}>
+        <div style={styles.zoneTitle}>自分のフィールド</div>
+        <div style={styles.fieldContainer}>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Card
+              key={index}
+              variant="outlined"
+              style={styles.cardSlot}
+              onClick={
+                cards[index] ? (e) => handleClick(e, cards[index], index) : null
+              }
+            >
+              {cards[index] ? (
+                <div className="card-content">
+                  <img
+                    src={cards[index].imageUrl}
+                    alt="card"
+                    style={styles.cardImage}
+                  />
+                  <div style={styles.cardOverlay}>
+                    {cards[index].attack} / {cards[index].defense}
+                  </div>
+                  <div style={styles.costCircle}>{cards[index].cost}</div>
+                  <div style={styles.cardName}>{cards[index].cardname}</div>
+                </div>
+              ) : (
+                <div style={styles.noCard}>No Card</div>
+              )}
+            </Card>
+          ))}
+        </div>
+
+        <Popover
+          id={id}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+        >
+          {isMyTurn && selectedCard?.attackStatus && (
+            <Button onClick={handleAttack}>攻撃</Button>
+          )}
+          <Button onClick={handleShowDetails}>詳細</Button>
+          <Button onClick={handleClose}>キャンセル</Button>
+        </Popover>
+      </div>
 
       <Modal open={showAttackModal} onClose={handleCloseAttackModal}>
         <div style={styles.modalContent}>
@@ -330,7 +380,7 @@ const Field = ({
           )}
         </div>
       </Modal>
-    </div>
+    </>
   );
 };
 

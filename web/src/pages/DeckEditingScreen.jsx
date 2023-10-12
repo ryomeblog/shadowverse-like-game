@@ -183,7 +183,6 @@ const DeckEditingScreen = () => {
       const deckData = await API.graphql(graphqlOperation(getAllDeck));
       const deckList = deckData.data.getAllDeck;
       setDecks(deckList);
-      console.log(JSON.stringify(deckList));
     } catch (error) {
       console.error("Error fetching decks", error);
     }

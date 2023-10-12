@@ -84,7 +84,7 @@ const sortdeck = (deck, sortBy) => {
   return [...deck].sort(sorter[sortBy]);
 };
 
-const CardList = ({ deck, onCardClick }) => {
+const DeckList = ({ deck, onCardClick }) => {
   const [sortBy, setSortBy] = useState("none");
   const sorteddeck = sortdeck(deck, sortBy);
 
@@ -130,4 +130,4 @@ const CardList = ({ deck, onCardClick }) => {
   );
 };
 
-export default CardList;
+export default DeckList;

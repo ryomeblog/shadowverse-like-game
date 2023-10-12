@@ -1,4 +1,4 @@
-const CardEffect = (status, card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+const CardEffect = (status, card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId, isNpcAttacking) => {
     if (status === 'endphase') {
         let afterEffect = {
             card,
@@ -10,14 +10,35 @@ const CardEffect = (status, card, cardIndex, targetCard, targetIndex, player, op
             turnCnt,
             gameWinnerId
         };
-        for (const [index, fieldCard] of afterEffect.player.fieldCards.entries()) {
-            console.log('fieldCard', fieldCard);
-            afterEffect = effectPlay(status, fieldCard, index, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId);
+        if (isNpcAttacking) {
+            for (const [index, fieldCard] of afterEffect.player.fieldCards.entries()) {
+                console.log('fieldCard', fieldCard);
+                const _afterEffect = effectPlay(status, fieldCard, index, targetCard, targetIndex, opponent, player, turnCnt, gameWinnerId);
+                afterEffect = {
+                    ..._afterEffect,
+                    player:_afterEffect.opponent,
+                    opponent:_afterEffect.player
+                };
+            }
+        } else {
+            for (const [index, fieldCard] of afterEffect.player.fieldCards.entries()) {
+                console.log('fieldCard', fieldCard);
+                afterEffect = effectPlay(status, fieldCard, index, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId);
+            }
         }
         return afterEffect;
     } else if (cardEffectPlay.hasOwnProperty(card.id)) {
         console.log('card', card);
-        return cardEffectPlay[card.id][status](card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId);
+        if (isNpcAttacking) {
+            const _afterEffect = cardEffectPlay[card.id][status](card, cardIndex, targetCard, targetIndex, opponent, player, turnCnt, gameWinnerId);
+            return {
+                ..._afterEffect,
+                player:_afterEffect.opponent,
+                opponent:_afterEffect.player
+            };
+        } else {
+            return cardEffectPlay[card.id][status](card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId);
+        }
     }
     return {
         card,
@@ -1472,6 +1493,339 @@ const cardEffectPlay = {
                 turnCnt,
                 gameWinnerId
             };
+        },
+        'ホルス': {
+            summon: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.lp += 5;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            },
+            battle: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                opponent.lp -= player.handCards.length;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            },
+            endphase: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            }
+        },
+        'マリア': {
+            summon: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.lp += 3;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            },
+            battle: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            },
+            endphase: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.lp += 2;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            }
+        },
+        'サムライ': {
+            summon: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.cost += 2;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            },
+            battle: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                opponent.cost -= 2;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            },
+            endphase: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            }
+        },
+        'アヌビス': {
+            summon: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.lp -= 5;
+                opponent.lp -= 5;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            },
+            battle: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            },
+            endphase: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            }
+        },
+        'クレオパトラ': {
+            summon: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            },
+            battle: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            },
+            endphase: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.lp += player.discardCards.length;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            }
+        },
+        'サタン': {
+            summon: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.lp = 1;
+                player.cost = player.maxCost;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            },
+            battle: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            },
+            endphase: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            }
+        },
+        'アトム': {
+            summon: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            },
+            battle: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.lp += card.attack;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            },
+            endphase: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            }
+        },
+        'ニンジャ': {
+            summon: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            },
+            battle: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                card.attack += 1;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            },
+            endphase: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            }
+        },
+        'ゼウス': {
+            summon: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.lp += 10;
+                opponent.lp -= 10;
+                return { card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId };
+            },
+            battle: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            },
+            endphase: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            }
+        },
+        'ミノタウロス': {
+            summon: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                opponent.cost -= 3;
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            },
+            battle: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                opponent.lp -= 3;
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            }
+        },
+        'アポロン': {
+            endphase: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.lp += 4;
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            },
+            battle: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                opponent.lp -= 4;
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            }
+        },
+        'サイボーグ009': {
+            summon: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.cost += 4;
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            },
+            endphase: (card, cardIndex, targetCard, targetIndex, player, opponent, turnCnt, gameWinnerId) => {
+                player.lp += 4;
+                return {
+                    card,
+                    cardIndex,
+                    targetCard,
+                    targetIndex,
+                    player,
+                    opponent,
+                    turnCnt,
+                    gameWinnerId
+                };
+            }
         }
     },
 };
